@@ -18,7 +18,7 @@ with open("sql/schema.sql", "r") as f:
 cursor.executescript(schema_sql)
 
 
-def insert_article(article: dict[str, str]):
+def insert_article(article: dict[str, str]) -> bool:
     statement = """
         INSERT INTO articles (guid, source, title, author, link, date_posted) 
         VALUES (:guid, :source, :title, :author, :link, :date_posted)
@@ -37,4 +37,18 @@ def insert_article(article: dict[str, str]):
 
     except sqlite3.Error as e:
         logger.error(f"Database error inserting article {article_id}: {e}")
+        return False
+
+
+def does_article_exists(source: str, guid: str) -> bool:
+    statement = """
+        SELECT  1 FROM articles
+        WHERE source = ? AND guid = ?
+    """
+    article_id = f"<{source}-{guid}>"
+    try:
+        cursor.execute(statement, (source, guid))
+        return cursor.fetchone() is not None
+    except sqlite3.Error as e:
+        logger.error(f"Database error checking article: {article_id}: {e}")
         return False
