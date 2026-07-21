@@ -1,6 +1,9 @@
 import requests
 import feedparser
 import logging
+import time
+
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,7 @@ def get_rss(rss: dict[str, str]) -> str | None:
         logger.error(f"Invalid feed config: {rss}")
         return None
 
-    logger.info(f"Checking feed: source {rss_source}")
+    logger.info(f"Checking feed: source {rss_source.upper()}")
 
     try:
         res = requests.get(rss_url, timeout=10)
@@ -25,6 +28,44 @@ def get_rss(rss: dict[str, str]) -> str | None:
         logger.error(f"Failed to fetch feed: {e}")
         return None
 
-    logger.info(f"Successfully fetched feed: {rss_source}")
+    logger.info(f"Successfully fetched feed: {rss_source.upper()}")
     xml_doc = res.text
     return xml_doc
+
+
+def parse_rss(xml_doc: str, source: str) -> list[dict]:
+    logger.info(f"Parsing XML feed: {source.upper()}")
+
+    xml = feedparser.parse(xml_doc)
+
+    # check if the xml is malformed
+    if xml.bozo:
+        logger.warning(f"Feed has a parse issuse: {xml.bozo_exception}")
+
+    # check if there are usable entries in the parsed xml
+    if not xml.entries:
+        logger.warning(f"Feed {source} has returned no usable entries")
+        return []
+
+    # gather and retrieve relevant information of every article
+    logger.info(f"Gathering and retrieving articles: {source.upper()}")
+    articles = []
+    for article in xml.entries:
+        # change format of published time
+        date_posted = datetime.fromtimestamp(
+            time.mktime(article.get("published_parsed"))
+        )
+
+        articles.append(
+            {
+                "guid": article.get("guid"),
+                "source": source,
+                "title": article.get("title"),
+                "author": article.get("author"),
+                "link": article.get("link"),
+                "date_posted": date_posted,
+            }
+        )
+    logger.info(f"Successfully gathered articles: {source.upper()}")
+
+    return articles
