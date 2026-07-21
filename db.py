@@ -25,6 +25,14 @@ def init_db() -> None:
         raise
 
 
+def close_db() -> None:
+    try:
+        conn.close()
+        logger.info("Database connection closed")
+    except sqlite3.Error as e:
+        logger.error(f"Error closing database connection: {e}")
+
+
 def insert_article(article: dict[str, str]) -> bool:
     statement = """
         INSERT INTO articles (guid, source, title, author, link, date_posted) 
