@@ -57,7 +57,7 @@ def insert_article(article: dict[str, str]) -> bool:
 
 def does_article_exists(source: str, guid: str) -> bool:
     statement = """
-        SELECT  1 FROM articles
+        SELECT 1 FROM articles
         WHERE source = ? AND guid = ?
     """
     article_id = f"<{source}-{guid}>"
@@ -66,4 +66,18 @@ def does_article_exists(source: str, guid: str) -> bool:
         return cursor.fetchone() is not None
     except sqlite3.Error as e:
         logger.error(f"Database error checking article: {article_id}: {e}")
+        return False
+
+
+def has_any_articles(source: str) -> bool:
+    statement = """
+        SELECT 1 FROM articles
+        WHERE source = ?
+        LIMIT 1
+    """
+    try:
+        cursor.execute(statement, (source,))
+        return cursor.fetchone() is not None
+    except sqlite3.Error as e:
+        logger.error(f"Database error checking source: {source.upper()}: {e}")
         return False
