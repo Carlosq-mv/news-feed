@@ -78,14 +78,21 @@ def parse_rss_xml(xml_doc: str, source: str) -> list[dict]:
             time.mktime(article.get("published_parsed"))
         )
 
+        guid = article.get("guid")
+        if not guid:
+            logger.warning(
+                f"Skipping article with invalid guid: source={source!r}, title={article.get('title')!r}"
+            )
+            continue
+
         # add articles to list with appropriate fields
         articles.append(
             {
                 "guid": article.get("guid"),
                 "source": source,
-                "title": article.get("title"),
-                "author": article.get("author"),
-                "link": article.get("link"),
+                "title": article.get("title", "Unknown"),
+                "author": article.get("author", "Unknown"),
+                "link": article.get("link", "N/A"),
                 "date_posted": date_posted,
             }
         )
