@@ -2,7 +2,7 @@ import logging
 import json
 import sys
 
-from rss_reader import get_rss, parse_rss
+from rss_reader import fetch_rss_xml, parse_rss_xml
 from db import insert_article, does_article_exists
 
 logging.basicConfig(
@@ -59,7 +59,40 @@ def validate_fields(feeds: list[dict[str, str]]) -> list[dict[str, str]]:
 
 
 def main():
+    """Rundown of workflow:
+    retrieve feed data from json files
+    validate feed data from json data (make sure source and url fields are present)
+    get rss data for every feed
+    parse the rss feeds to only get desired data from the articles
+    check if article is in database
+    if not in database commit to database
+    """
+    # retrieve the feeds with source and url from json file
     feeds = load_feed_config(sys.argv[1])
 
-    for feed in feeds:
-        pass
+    # validate the feeds
+    valid_feeds = validate_fields(feeds)
+
+    for feed in valid_feeds:
+        raw_xml_data = fetch_rss_xml(feed)
+
+        if not raw_xml_data:
+            logger.warning(f"Skipping feed, no XML data returned: {feed.get('source')}")
+            continue
+
+        # NOTE: guid and source are validated in previous functions
+        parsed_xml_data = parse_rss_xml(raw_xml_data, feed.get("source"))  # type: ignore
+
+        for article in parsed_xml_data:
+            # check if article exists is in database
+            source, guid = article.get("source"), article.get("guid")  # type: ignore
+
+            # skip article if it is a duplicate
+            if does_article_exists(source, guid):  # type: ignore
+                continue
+
+            # insert article into database
+            insert_article(article)
+
+
+main()
