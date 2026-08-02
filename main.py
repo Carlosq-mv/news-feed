@@ -1,17 +1,13 @@
 import logging
 import sys
-import os
-
-from dotenv import load_dotenv
+import time
 
 from rss_reader import fetch_rss_xml, parse_rss_xml
 from db import insert_article, does_article_exists, has_any_articles, init_db, close_db
 from feed_config import load_feed_config, validate_fields
-from notifier import notify
+from notifier import notify, should_notify
+from config import DISCORD_WEBHOOK_URL
 
-load_dotenv()
-
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,9 +18,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def load_prompt(path: str = "preferences/prompt.txt") -> str:
+    with open(path, "r") as f:
+        prompt = f.read().strip()
+    return prompt
+
+
 def main():
     try:
         init_db()
+        # load llm prompt
+        prompt_template = load_prompt()
+
         # retrieve the feeds with source and url from json file
         feeds = load_feed_config(sys.argv[1])
 
@@ -67,9 +72,9 @@ def main():
                 # insert article into database
                 inserted = insert_article(article)
 
-                if inserted:
+                if inserted and should_notify(article, prompt_template):
                     notify(article, DISCORD_WEBHOOK_URL)
-
+                time.sleep(2.1)
     finally:
         close_db()
 
