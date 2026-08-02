@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS articles (
     title TEXT,
     author TEXT,
     link TEXT,
+    summary TEXT,
     date_posted DATETIME,
     UNIQUE (source, guid)
 );
