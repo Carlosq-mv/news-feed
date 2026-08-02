@@ -53,8 +53,8 @@ def insert_article(article: dict[str, str]) -> bool:
     """
 
     statement = """
-        INSERT INTO articles (guid, source, title, author, link, date_posted)
-        VALUES (:guid, :source, :title, :author, :link, :date_posted)
+        INSERT INTO articles (guid, source, title, author, link, summary, date_posted)
+        VALUES (:guid, :source, :title, :author, :link, :summary, :date_posted)
     """
     article_id = f"<{article.get('source')}-{article.get('guid')}>"
 
