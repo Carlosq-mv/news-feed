@@ -93,6 +93,7 @@ def parse_rss_xml(xml_doc: str, source: str) -> list[dict]:
                 "title": article.get("title", "Unknown"),
                 "author": article.get("author", "Unknown"),
                 "link": article.get("link", "N/A"),
+                "summary": article.get("summary", ""),
                 "date_posted": date_posted,
             }
         )
