@@ -67,7 +67,7 @@ def main():
 
                 # skip article if it is a duplicate
                 if does_article_exists(source, guid):
-                    continue
+                    break
 
                 # insert article into database
                 inserted = insert_article(article)
