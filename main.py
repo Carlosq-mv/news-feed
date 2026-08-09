@@ -12,6 +12,7 @@ from config import DISCORD_WEBHOOK_URL
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %I:%M:%S %p",
     handlers=[logging.FileHandler("app.log"), logging.StreamHandler()],
 )
 
