@@ -5,7 +5,10 @@ A lightweight, cron-scheduled backend service that ingests RSS feeds, filters ar
 
 ## How it Works
 
-![Flow Diagram](./images/flow-diagram.png)
+
+<p align="center">
+  <img src="./images/flow-diagram.png" width="600">
+</p>
 
 ---
 
@@ -55,7 +58,7 @@ news-feed/
 | Language      | Python 3.12                     | Familiar, high productivity language                                                                                                                                                                                              |
 | Feed fetching | `requests`                      | Standard, minimal HTTP client that worked with the  low-frequency of calls per run                                                                                                                                                |
 | Feed parsing  | `feedparser`                    | Normalizes inconsistent RSS/Atom formats across feeds                                                                                                                                                                             |
-| Database      | SQLite                          | Single file, serverless design of SQLite matches the workload of this project (*one writer, low volume*), making a full client-server database unnecessary overhead with no current benefit                                       |
+| Database      | SQLite                          | Single file, serverless design of SQLite matches the workload of this project (*one writer, low volume*). Using a full client-server database adds unnecessary overhead with no current benefit                                       |
 | Filtering     | Groq API (LLama 3.3 70B)        | Rich open source model library and a generous free tier offered by Groq. Llama 3.3 70B over smaller model because the filtering logic evaluates multiple conditions simultaneously which benefits from a larger model's judgement |
 | Notifications | Discord Webhook                 | Discord is a platform I often use and no bot was needed, just a webhook                                                                                                                                                           |
 | Scheduling    | Linux cron                      | A one-shot batch job, not a long-running service. Cron is the proportionate tool                                                                                                                                                  |
